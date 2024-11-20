@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
+#include <stdbool.h>
 
 
 #define UP 1
@@ -13,8 +13,14 @@
 #define PARED -1
 #define VACIO 0
 #define PUNTO 1
+#define PUNTO_GRANDE 11
 #define PACMAN 2
 #define BARRERA 3
+
+#define BLINKY 51	// Rojo
+#define PINKY 52	// Rosado
+#define INKY 53		// Celeste
+#define CLYDE 54	// Naranja
 
 
 int** CrearMatriz(int nFilas, int nColumnas)
@@ -64,36 +70,49 @@ void ImprimirMatriz(int** matriz, int nFilas, int nColumnas)
 	{
 		for(int j=0; j<nColumnas; j++) 
 		{
-		 	if(matriz[i][j] == PARED)	//Pared
-		 	{
-                printf("[]");	//	█
-            }
-            else if(matriz[i][j] == VACIO)	//Vacío
-            {
-                printf("  ");
-            }
-            else if(matriz[i][j] == PUNTO)	//Puntos
-            {
-                printf(". ");	//	•
-            }
-            else if(matriz[i][j] == PACMAN)	//Pacman
-            {
-                printf("O ");	//	ᗧ
-            }
-            else if(matriz[i][j] == BARRERA)	//Barrera
-            {
-                printf("= ");	//	░
-            }
-            else
-            {
-            	printf("%d ", matriz[i][j]);
-            }
+		 	switch(matriz[i][j])
+			{
+				case PARED:
+				    printf("[]");	//	█
+				    break;
+				case VACIO:
+				    printf("  ");
+				    break;
+				case PUNTO:
+					printf(". ");	//	•
+					break;
+				case PUNTO_GRANDE:
+					printf("o ");	//	⬤
+					break;
+				case BARRERA:
+					printf("==");	//	░
+					break;
+				case PACMAN:
+					printf("O ");	//	ᗧ
+					break;
+				case BLINKY:
+					printf("& ");	//	ᗣ
+					break;
+				case PINKY:
+					printf("& ");	//	ᗣ
+					break;
+				case INKY:
+					printf("& ");	//	ᗣ
+					break;
+				case CLYDE:
+					printf("& ");	//	ᗣ
+					break;
+				default:
+					printf("%d ", matriz[i][j]);
+			}
 		}
+
+
 	printf("\n");
 	}
 }
 
-void RetornarMatriz()
+void RetornarMatriz() //	To do
 {
 	/*
 	retornar matriz con file en un archivo llamado matriz_actual.txt
@@ -178,6 +197,7 @@ void MoverJugador(int** matriz, int nX, int nY, int inputActual)
 		}
 		else if(matriz[xPacman-1][yPacman] == VACIO)
 		{
+			matriz[xPacman][yPacman] = VACIO;
 			matriz[xPacman-1][yPacman] = PACMAN;
 		}
 		else if(matriz[xPacman-1][yPacman] == PUNTO)
@@ -194,6 +214,7 @@ void MoverJugador(int** matriz, int nX, int nY, int inputActual)
 		}
 		else if(matriz[xPacman][yPacman-1] == VACIO)
 		{
+			matriz[xPacman][yPacman] = VACIO;
 			matriz[xPacman][yPacman-1] = PACMAN;
 		}
 		else if(matriz[xPacman][yPacman-1] == PUNTO)
@@ -210,6 +231,7 @@ void MoverJugador(int** matriz, int nX, int nY, int inputActual)
 		}
 		else if(matriz[xPacman+1][yPacman] == VACIO)
 		{
+			matriz[xPacman][yPacman] = VACIO;
 			matriz[xPacman+1][yPacman] = PACMAN;
 		}
 		else if(matriz[xPacman+1][yPacman] == PUNTO)
@@ -225,7 +247,8 @@ void MoverJugador(int** matriz, int nX, int nY, int inputActual)
 			matriz[xPacman][yPacman] = PACMAN;
 		}
 		else if(matriz[xPacman][yPacman+1] == VACIO)
-		{
+		{	
+			matriz[xPacman][yPacman] = VACIO;
 			matriz[xPacman][yPacman+1] = PACMAN;
 		}
 		else if(matriz[xPacman][yPacman+1] == PUNTO)
@@ -238,16 +261,23 @@ void MoverJugador(int** matriz, int nX, int nY, int inputActual)
 
 
 
+
 int main()
 {
-
 	int nx = 31;
 	int ny = 28;
 
 	int** matrizPrincipal = CrearMatriz(nx, ny);
-
 	RecibirMatriz(matrizPrincipal, nx, ny);
+
+
 	matrizPrincipal[23][13] = PACMAN;
+
+	matrizPrincipal[11][13] = BLINKY;
+	matrizPrincipal[14][11] = INKY;
+	matrizPrincipal[14][13] = PINKY;
+	matrizPrincipal[14][15] = CLYDE;
+
 
 	int input = 0;
 	while(input!=(-1))
@@ -255,7 +285,7 @@ int main()
 		ImprimirMatriz(matrizPrincipal, nx, ny);
 		input = RecibirInputWASD();
 		printf("\n");
-		//	MoverJugador(matrizPrincipal, nx, ny, input);
+		MoverJugador(matrizPrincipal, nx, ny, input);
 	}
 
 
