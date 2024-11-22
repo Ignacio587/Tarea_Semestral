@@ -253,6 +253,8 @@ void MoverFantasma(int** matriz, int nFilas, int nColumnas, int FANTASMA)
             matriz[xFantasma][yFantasma] = VACIO; // Dejar vacío la posición anterior
             matriz[newX][newY] = FANTASMA;     // Mover Fantasma
         }
+        else
+            MoverFantasma(matriz, nFilas, nColumnas, FANTASMA);
     }
 }
 
@@ -291,9 +293,9 @@ int main() {
         system("cls"); // Limpiar pantalla WINDOWS
         ImprimirInfo(puntaje, tiempo);
         ImprimirMatriz(matrizPrincipal, nFilas, nColumnas);
-        printf("-- Utilice WASD para moverse y Q para cerrar el juego --\n");
+        printf("\n-- Utilice WASD para moverse y Q para cerrar el juego --\n");
 
-        // char key = getchar(); // Capturar tecla LINUX
+        // char input = getchar(); // Capturar tecla LINUX
         char input = _getch(); // Capturar tecla WINDOWS
         int direccion = 0;
 
