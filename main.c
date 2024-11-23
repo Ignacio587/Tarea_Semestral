@@ -63,8 +63,8 @@ int** CrearMatriz(int nFilas, int nColumnas)
     return matriz;
 }
 
-// Leer matriz desde archivo
-void RecibirMatriz(char matrizTxt[], int** matrizActual, int nFilas, int nColumnas)
+// Leer mapa desde archivo
+void RecibirMapa(char matrizTxt[], int** matrizActual, int nFilas, int nColumnas)
 {
     FILE* archivo = fopen(matrizTxt, "r");
     if(archivo == NULL)
@@ -78,6 +78,34 @@ void RecibirMatriz(char matrizTxt[], int** matrizActual, int nFilas, int nColumn
         for(int j = 0; j < nColumnas; j++)
         {
             fscanf(archivo, "%d", &matrizActual[i][j]);
+        }
+    }
+    fclose(archivo);
+}
+
+// Leer posiciones de pacman y fantasmas desde archivo
+void RecibirPosiciones(char posicionesTXT[], int** matrizActual)
+{
+    FILE* archivo = fopen(posicionesTXT, "r");
+    if(archivo == NULL)
+    {
+        printf("Error: No se pudo abrir el archivo %s\n", posicionesTXT);
+        exit(1);
+    }
+
+    for(int i=0; i<5; i++)
+    {
+        int x, y;
+        fscanf(archivo, "%d", &x);
+        fscanf(archivo, "%d", &y);
+
+        switch(i) {
+        case 0: matrizActual[x][y] = PACMAN; break;
+        case 1: matrizActual[x][y] = BLINKY; break;
+        case 2: matrizActual[x][y] = PINKY; break;
+        case 3: matrizActual[x][y] = INKY; break;
+        case 4: matrizActual[x][y] = CLYDE; break;
+        default: matrizActual[x][y] = VACIO; break;
         }
     }
     fclose(archivo);
@@ -263,18 +291,12 @@ int main() {
     // Tamaño de la matriz
     int nFilas = 31, nColumnas = 28;
 
-    // Crear matriz e inicializar
+    // Crear matriz e inicializar con mapa inicial
     int** matrizPrincipal = CrearMatriz(nFilas, nColumnas);
-    RecibirMatriz("matriz_inicial.txt", matrizPrincipal, nFilas, nColumnas);
+    RecibirMapa("mapa1.txt", matrizPrincipal, nFilas, nColumnas);
 
-    // Posición inicial Pacman
-    matrizPrincipal[23][13] = PACMAN;
-
-    // Posición inicial fantasmas
-	matrizPrincipal[11][13] = BLINKY;
-	matrizPrincipal[14][11] = INKY;
-	matrizPrincipal[14][13] = PINKY;
-	matrizPrincipal[14][15] = CLYDE;
+    // Posición inicial Pacman y fantasmas
+    RecibirPosiciones("posiciones.txt", matrizPrincipal);
 
     /* SOLO LINUX
     // Configurar terminal en modo raw para recibir input directo
