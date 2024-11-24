@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-/* PARA WINDOWS
-*/
 #include <ctype.h>
 #include <conio.h>
 /*
 PARA LINUX
-#include <termios.h> 
+#include <termios.h>
 #include <unistd.h>
 */
 
@@ -52,7 +50,7 @@ void disableRawMode()
 }
 */
 
-// Crear matriz dinámica
+// Crear matriz dinámica de nFilas por nColumnas
 int** CrearMatriz(int nFilas, int nColumnas)
 {
     int** matriz = (int**)malloc(sizeof(int*)*nFilas);
@@ -63,7 +61,7 @@ int** CrearMatriz(int nFilas, int nColumnas)
     return matriz;
 }
 
-// Leer mapa desde archivo
+// Leer mapa desde archivo matrizTxt[] y recibirlo en matrizActual
 void RecibirMapa(char matrizTxt[], int** matrizActual, int nFilas, int nColumnas)
 {
     FILE* archivo = fopen(matrizTxt, "r");
@@ -83,13 +81,13 @@ void RecibirMapa(char matrizTxt[], int** matrizActual, int nFilas, int nColumnas
     fclose(archivo);
 }
 
-// Leer posiciones de pacman y fantasmas desde archivo
-void RecibirPosiciones(char posicionesTXT[], int** matrizActual)
+// Leer posiciones de pacman y fantasmas desde archivo posicionesTxt
+void RecibirPosiciones(char posicionesTxt[], int** matrizActual)
 {
-    FILE* archivo = fopen(posicionesTXT, "r");
+    FILE* archivo = fopen(posicionesTxt, "r");
     if(archivo == NULL)
     {
-        printf("Error: No se pudo abrir el archivo %s\n", posicionesTXT);
+        printf("Error: No se pudo abrir el archivo %s\n", posicionesTxt);
         exit(1);
     }
 
@@ -110,6 +108,56 @@ void RecibirPosiciones(char posicionesTXT[], int** matrizActual)
     }
     fclose(archivo);
 }
+
+// Sobreescribir mapa actual para que quede guardado
+void ActualizarMapa(char matrizTxt[], int** matrizActual, int nFilas, int nColumnas)
+{
+    FILE* archivo = fopen(matrizTxt, "w");
+    if(archivo == NULL)
+    {
+        printf("Error: No se pudo abrir el archivo %s\n", matrizTxt);
+        exit(1);
+    }
+
+    for(int i = 0; i < nFilas; i++)
+    {
+        for(int j = 0; j < nColumnas; j++)
+        {
+            fprintf(archivo, "%d ", matrizActual[i][j]);
+        }
+        fprintf(archivo, "\n");
+    }
+    fclose(archivo);
+}
+
+
+/*
+// Sobreescribir posiciones actuales para que queden guardadas
+void ActualizarPosiciones(char posicionesTxt[], int** matrizActual)
+{
+    FILE* archivo = fopen(posicionesTxt, "w");
+    if(archivo == NULL)
+    {
+        printf("Error: No se pudo abrir el archivo %s\n", posicionesTxt);
+        exit(1);
+    }
+
+    for(int i=0; i<5; i++)
+    {
+        switch(i) {
+        case 0:  break;
+        case 1:  break;
+        case 2:  break;
+        case 3:  break;
+        case 4:  break;
+        default:  break;
+        }
+
+        fprintf(archivo, "%d %d", x, y);
+    }
+    fclose(archivo);
+}
+*/
 
 // Imprimir la matriz
 void ImprimirMatriz(int** matriz, int nFilas, int nColumnas)
@@ -167,7 +215,8 @@ void ImprimirInfo(int puntaje, int tiempo)
 }
 
 // Buscar la posición de Pac-Man
-void BuscarPacman(int** matriz, int nFilas, int nColumnas, int* x, int* y) {
+void BuscarPacman(int** matriz, int nFilas, int nColumnas, int* x, int* y)
+{
     for(int i = 0; i < nFilas; i++)
     {
         for(int j = 0; j < nColumnas; j++)
@@ -311,6 +360,10 @@ int main() {
     int running = true;
     while (running)
     {
+        // Actualizar mapa_actual.txt con información nueva y insertarlo en matrizPrincipal.
+        ActualizarMapa("mapa_actual.txt", matrizPrincipal, nFilas, nColumnas);
+        RecibirMapa("mapa_actual.txt", matrizPrincipal, nFilas, nColumnas);
+
         // system("clear"); // Limpiar pantalla LINUX
         system("cls"); // Limpiar pantalla WINDOWS
         ImprimirInfo(puntaje, tiempo);
@@ -338,6 +391,7 @@ int main() {
             MoverFantasma(matrizPrincipal, nFilas, nColumnas, CLYDE);
             tiempo++;
         }
+
     }
 
     /* SOLO LINUX
