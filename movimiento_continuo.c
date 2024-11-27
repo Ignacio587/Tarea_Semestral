@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <sys/select.h>
+#include <sys/select.h>  //biblioteca para movimiento continuo.
 //#include <conio.h>
 /*
 PARA LINUX*/
@@ -26,17 +26,21 @@ PARA LINUX*/
 #define DOWN 3
 #define RIGHT 4
 
+
 #define PARED -1
 #define VACIO 0
 #define PUNTO 1
 #define PUNTO_GRANDE 11
 #define PACMAN 2
 #define BARRERA 3
+#define muerto -5
+
 
 #define BLINKY 51	// Rojo
 #define PINKY 52	// Rosado
 #define INKY 53		// Celeste
 #define CLYDE 54	// Naranja
+int vidas=2;
 
 //ACTIVAR EN LINUX
 
@@ -235,10 +239,27 @@ void BuscarPacman(int** matriz, int nFilas, int nColumnas, int* x, int* y)
             {
                 *x = i;
                 *y = j;
+                
                 return;
+            }else{
+                *x=muerto;
+                *y=muerto;
             }
         }
     }
+}
+void LimpiarPacmanFantasmas(int** matriz, int nFilas,int nColumnas)
+{
+  for(int i=0; i<nFilas; i++)
+  {
+    for(int j=0; i<nColumnas; i++)
+    {
+     if(matriz[i][j]==PACMAN || matriz[i][j]==INKY || matriz[i][j]==PINKY || matriz[i][j]==BLINKY || matriz[i][j]==CLYDE)
+      {
+        matriz[i][j]==VACIO;
+      }
+    }
+  }
 }
 
 // Mover a Pac-Man en la matriz
@@ -247,7 +268,7 @@ void MoverJugador(int** matriz, int nFilas, int nColumnas, int direccion, int* p
     
     int xPacman, yPacman;
     BuscarPacman(matriz, nFilas, nColumnas, &xPacman, &yPacman);
-
+    
     // Determinar nueva posición
     int newX = xPacman, newY = yPacman;
     if(direccion == UP){
@@ -335,13 +356,29 @@ void MoverFantasma(int** matriz, int nFilas, int nColumnas, int FANTASMA)
 
     if (newX >= 0 && newX < nFilas && newY >= 0 && newY < nColumnas)
     {
-        if(matriz[newX][newY] != PARED)
-        {
-            matriz[xFantasma][yFantasma] = VACIO; // Dejar vacío la posición anterior
+        if(matriz[newX][newY] == PARED)
+        {   
+             MoverFantasma(matriz, nFilas, nColumnas, FANTASMA);
+        }else if(matriz[newX][newY]==PUNTO){
+            matriz[xFantasma][yFantasma] = PUNTO; // Dejar vacío la posición anterior
             matriz[newX][newY] = FANTASMA;     // Mover Fantasma
+        }else if(matriz[newX][newY] == VACIO){
+            matriz[xFantasma][yFantasma] = VACIO; // Dejar vacío la posición anterior
+            matriz[newX][newY] = FANTASMA;  
+        }else if(matriz[newX][newY]==BARRERA){
+            matriz[xFantasma][yFantasma] = VACIO; // Dejar vacío la posición anterior
+            matriz[newX][newY] = FANTASMA; 
+        }else if (matriz[newX][newY] == BLINKY || matriz[newX][newY] == INKY || matriz[newX][newY] == PINKY || matriz[newX][newY] == CLYDE){
+            MoverFantasma(matriz,nFilas,nColumnas,FANTASMA);
+        }else if( matriz[newX][newY] == PUNTO_GRANDE){
+            matriz[xFantasma][yFantasma] = PUNTO_GRANDE; 
+            matriz[newX][newY] = FANTASMA; 
         }
-        else
-            MoverFantasma(matriz, nFilas, nColumnas, FANTASMA);
+         else if (matriz[newX][newY]== PACMAN){
+            matriz[xFantasma][yFantasma]= VACIO;
+            matriz[newX][newY] = FANTASMA;
+            
+         }   
     }
 }
 
@@ -373,7 +410,7 @@ int main() {
     int timeout_ms = 500;
     // Ciclo principal del juego
     int running = true;
-    while (running)
+    while (vidas>0)
     {
         // Actualizar mapa_actual.txt con información nueva y insertarlo en matrizPrincipal.
         ActualizarMapa("mapa_actual.txt", matrizPrincipal, nFilas, nColumnas);
@@ -383,7 +420,7 @@ int main() {
          // system("cls"); // Limpiar pantalla WINDOWS
         ImprimirInfo(puntaje, tiempo);
         ImprimirMatriz(matrizPrincipal, nFilas, nColumnas);
-        printf("\n-- Utilice WASD para moverse y Q para cerrar el juego --\n");
+        printf("\n-- Utilice WASD para moverse y Q para cerrar el juego. Vidas: %d --\n", vidas);
         // Desde aquí vor a estudiar la funcion, y la struct timeval
          // Configurar el tiempo de espera (5 segundos en este ejemplo)
         timeout.tv_sec = timeout_ms / 1000;               // Segundos
@@ -435,9 +472,21 @@ int main() {
             MoverFantasma(matrizPrincipal, nFilas, nColumnas, CLYDE);
             tiempo++;
         }
+        int xPacman, yPacman;
+        BuscarPacman(matrizPrincipal, nFilas, nColumnas, &xPacman, &yPacman);
+        if(xPacman == muerto && yPacman == muerto){
 
+            vidas--;
+            LimpiarPacmanFantasmas(matrizPrincipal,nFilas,nColumnas);
+            RecibirPosiciones("posiciones.txt", matrizPrincipal);
+            if(vidas==0){
+                system("clear");
+                printf("Game over\n");
+            }
+        }
     }
     usleep(500000); 
+
     /* SOLO LINUX
     // Restaurar terminal al modo normal*/
     disableRawMode();
